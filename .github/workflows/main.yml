@@ -6,19 +6,18 @@ on:
       - main
 
 jobs:
-
   test:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4        # ← v4 (était v3)
+      - uses: actions/checkout@v4 
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4      # ← v4 (était v3)
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
 
-      - name: Installer les dépendances
+      - name: Installer les dependances
         working-directory: ./backend
         run: npm install
 
@@ -30,38 +29,36 @@ jobs:
     name: Build & Push Docker
     runs-on: ubuntu-latest
     needs: test
-
     steps:
-      - uses: actions/checkout@v4        # ← v4
+      - uses: actions/checkout@v4
 
       - name: Connexion DockerHub
-        uses: docker/login-action@v3     # ← v3 (était v2)
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build et Push Backend
-        uses: docker/build-push-action@v6  # ← v6 (était v4)
+        uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
           tags: marinecdt/backend:latest
 
       - name: Build et Push Frontend
-        uses: docker/build-push-action@v6  # ← v6
+        uses: docker/build-push-action@v6
         with:
           context: ./frontend
           push: true
           tags: marinecdt/frontend:latest
 
   deploy:
-    name: Déploiement Azure VM
+    name: Deploiement Azure VM (Kubernetes)
     runs-on: ubuntu-latest
     needs: build-and-push
-
     steps:
-      - name: Déploiement sur la VM Azure via SSH
-        uses: appleboy/ssh-action@v1.0.3   # ← version explicite
+      - name: Deploiement sur K3s via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
@@ -69,7 +66,14 @@ jobs:
           script: |
             cd projet_final_integration_deploiement
             git pull origin main
-            docker-compose pull
-            docker-compose up -d
-            docker-compose ps
-            echo " Déploiement terminé !"
+            
+            sudo kubectl apply -f k8s/secret.yml
+            sudo kubectl apply -f k8s/deployment.yml
+            sudo kubectl apply -f k8s/service.yml
+            sudo kubectl apply -f k8s/frontend.yml
+            
+            sudo kubectl rollout restart deployment backend-deployment
+            sudo kubectl rollout restart deployment frontend-deployment
+            
+            sudo kubectl get pods
+            echo "Deploiement sur K3s termine avec succes !"
