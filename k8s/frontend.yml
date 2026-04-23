@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ton-dockerhub-username/frontend:latest # N'oublie pas de mettre ton pseudo !
+        image: marinecdt/frontend:latest # N'oublie pas de mettre ton pseudo !
         ports:
         - containerPort: 3000 # <-- CORRECTION ICI (3000 au lieu de 80)
 ---

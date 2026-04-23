@@ -38,12 +38,52 @@
     </div>
 
     <script>
+        // Dictionnaire avec tes 5 utilisateurs et leurs mots de passe spécifiques
+        const users = {
+            "marine1": "password11",
+            "marine2": "password22",
+            "marine3": "password33",
+            "marine4": "password44",
+            "marine5": "password55"
+        };
+
+        // Vérifie si l'utilisateur est déjà connecté au chargement
+        window.onload = () => {
+            if (sessionStorage.getItem("isLoggedIn")) {
+                showAccueil(sessionStorage.getItem("user"));
+            }
+        };
+
+        function checkLogin() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            // Vérification sécurisée
+            if (users[user] && users[user] === pass) {
+                sessionStorage.setItem("isLoggedIn", "true");
+                sessionStorage.setItem("user", user);
+                showAccueil(user);
+            } else {
+                document.getElementById('error').innerText = "Identifiants incorrects !";
+            }
+        }
+
+        function showAccueil(user) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('accueil').style.display = 'inline-block';
+            document.getElementById('user-display').innerText = user;
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            location.reload(); 
+        }
+
         async function testConnection() {
             const resDiv = document.getElementById('resultat');
-            // MODIFICATION ICI : On cible explicitement le port 3000 du backend
-            const backendUrl = "http://localhost:3000"; 
             try {
-                const response = await fetch(`${backendUrl}/health`);
+                // En production K8s, ton frontend pourra appeler directement le service backend
+                const response = await fetch('http://20.19.80.2:30000/health'); 
                 const data = await response.json();
                 resDiv.style.backgroundColor = "#c8e6c9";
                 resDiv.style.color = "#2e7d32";
@@ -51,8 +91,7 @@
             } catch (err) {
                 resDiv.style.backgroundColor = "#ffcdd2";
                 resDiv.style.color = "#c62828";
-                resDiv.innerHTML = "❌ Oups, connexion échouée !";
-                console.error(err); // Affiche l'erreur réelle dans la console du navigateur (F12)
+                resDiv.innerHTML = "❌ Erreur de connexion au backend.";
             }
         }
     </script>

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ton-dockerhub-username/backend:latest
+        image: marinecdt/backend:latest
         ports:
         - containerPort: 3000
         env:
