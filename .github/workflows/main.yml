@@ -7,17 +7,14 @@ on:
 
 jobs:
 
-  # ──────────────────────────────────────
-  # ÉTAPE 1 & 2 : Tests (obligatoire TP)
-  # ──────────────────────────────────────
   test:
     name: Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4        # ← v4 (était v3)
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4      # ← v4 (était v3)
         with:
           node-version: '18'
 
@@ -28,67 +25,51 @@ jobs:
       - name: Lancer les tests
         working-directory: ./backend
         run: npm test
-        # Pipeline bloqué ici si les tests échouent
 
-  # ──────────────────────────────────────
-  # ÉTAPE 3 & 4 : Build + Push Docker Hub
-  # ──────────────────────────────────────
   build-and-push:
     name: Build & Push Docker
     runs-on: ubuntu-latest
-    needs: test  # ← attend que les tests passent
+    needs: test
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4        # ← v4
 
       - name: Connexion DockerHub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3     # ← v3 (était v2)
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Build et Push Backend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6  # ← v6 (était v4)
         with:
           context: ./backend
           push: true
           tags: marinecdt/backend:latest
 
       - name: Build et Push Frontend
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6  # ← v6
         with:
           context: ./frontend
           push: true
           tags: marinecdt/frontend:latest
 
-  # ──────────────────────────────────────
-  # ÉTAPE 5 & 6 : Déploiement sur la VM
-  # ──────────────────────────────────────
   deploy:
     name: Déploiement Azure VM
     runs-on: ubuntu-latest
-    needs: build-and-push  # ← attend que les images soient pushées
+    needs: build-and-push
 
     steps:
       - name: Déploiement sur la VM Azure via SSH
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3   # ← version explicite
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
             cd projet_final_integration_deploiement
-
-            # Récupérer le dernier code
             git pull origin main
-
-            # Tirer les nouvelles images Docker Hub
             docker-compose pull
-
-            # Redémarrer les services avec les nouvelles images
             docker-compose up -d
-
-            # Vérifier que les conteneurs tournent
             docker-compose ps
-
-            echo "Déploiement terminé !"
+            echo " Déploiement terminé !"
