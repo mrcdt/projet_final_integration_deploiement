@@ -2,96 +2,32 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Marine's Dashboard ✨</title>
+    <title>Mon Application ✨</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', cursive, sans-serif; 
-            text-align: center; 
-            background: linear-gradient(135deg, #fce4ec, #f3e5f5);
-            color: #880e4f;
-            padding-top: 50px;
-        }
-        .card { 
-            background: white; 
-            padding: 30px; 
-            border-radius: 25px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
-            display: inline-block; 
-            width: 80%; max-width: 400px;
-        }
-        h1 { color: #d81b60; font-size: 24px; }
-        button { 
-            padding: 12px 25px; margin: 10px; border: none; border-radius: 20px; 
-            cursor: pointer; background: #ec407a; color: white; font-weight: bold;
-            transition: 0.3s;
-        }
-        button:hover { background: #d81b60; transform: scale(1.05); }
-        #resultat { margin-top: 20px; padding: 15px; border-radius: 15px; font-weight: bold; }
+        body { font-family: sans-serif; background: #fce4ec; text-align: center; padding-top: 50px; }
+        .card { background: white; padding: 30px; border-radius: 20px; display: inline-block; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        button { padding: 10px 20px; border: none; border-radius: 10px; background: #ec407a; color: white; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>Bienvenue chez Marine Cadet ✨</h1>
-        <p>Tout fonctionne à merveille !</p>
-        <button onclick="testConnection()">Tester la connexion</button>
-        <div id="resultat"></div>
+        <h1>Bienvenue sur mon application ✨</h1>
+        <button onclick="testConnection()">Tester la connexion Backend</button>
+        <div id="resultat" style="margin-top: 20px;"></div>
     </div>
 
     <script>
-        // Dictionnaire avec tes 5 utilisateurs et leurs mots de passe spécifiques
-        const users = {
-            "marine1": "password11",
-            "marine2": "password22",
-            "marine3": "password33",
-            "marine4": "password44",
-            "marine5": "password55"
-        };
-
-        // Vérifie si l'utilisateur est déjà connecté au chargement
-        window.onload = () => {
-            if (sessionStorage.getItem("isLoggedIn")) {
-                showAccueil(sessionStorage.getItem("user"));
-            }
-        };
-
-        function checkLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-
-            // Vérification sécurisée
-            if (users[user] && users[user] === pass) {
-                sessionStorage.setItem("isLoggedIn", "true");
-                sessionStorage.setItem("user", user);
-                showAccueil(user);
-            } else {
-                document.getElementById('error').innerText = "Identifiants incorrects !";
-            }
-        }
-
-        function showAccueil(user) {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('accueil').style.display = 'inline-block';
-            document.getElementById('user-display').innerText = user;
-        }
-
-        function logout() {
-            sessionStorage.clear();
-            location.reload(); 
-        }
-
         async function testConnection() {
             const resDiv = document.getElementById('resultat');
             try {
-                // En production K8s, ton frontend pourra appeler directement le service backend
-                const response = await fetch('http://20.19.80.2:30000/health'); 
+                // Utilise localhost en local, ou l'IP de ta VM sur Azure
+                const response = await fetch('http://localhost:3000/health');
                 const data = await response.json();
-                resDiv.style.backgroundColor = "#c8e6c9";
-                resDiv.style.color = "#2e7d32";
-                resDiv.innerHTML = `✅ Connecté au Backend !<br>Status: ${data.status}`;
+                resDiv.innerHTML = `✅ Backend répond : ${data.status}`;
+                resDiv.style.color = "green";
             } catch (err) {
-                resDiv.style.backgroundColor = "#ffcdd2";
-                resDiv.style.color = "#c62828";
                 resDiv.innerHTML = "❌ Erreur de connexion au backend.";
+                resDiv.style.color = "red";
             }
         }
     </script>

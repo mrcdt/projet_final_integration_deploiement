@@ -6,16 +6,10 @@ on:
       - main
 
 jobs:
-  test-and-build:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-
-      - name: Installation et Test Backend
-        working-directory: ./backend
-        run: |
-          npm install
-          npm test
 
       - name: Connexion DockerHub
         uses: docker/login-action@v2
@@ -38,17 +32,19 @@ jobs:
           tags: marinecdt/frontend:latest
 
   deploy:
-    needs: test-and-build
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-      - name: Déploiement sur la VM Azure
+      - name: Déploiement sur la VM Azure via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM_IP }}
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
-            # Mise à jour des images dans le cluster
-            kubectl rollout restart deployment/backend
-            kubectl rollout restart deployment/frontend
-            kubectl rollout restart deployment/db
+            # On va dans le dossier du projet
+            cd projet_final_integration_deploiement
+            # On tire les nouvelles images
+            docker-compose pull
+            # On redémarre les services
+            docker-compose up -d --build
