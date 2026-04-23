@@ -6,8 +6,38 @@ on:
       - main
 
 jobs:
-  build-and-push:
+
+  # ──────────────────────────────────────
+  # ÉTAPE 1 & 2 : Tests (obligatoire TP)
+  # ──────────────────────────────────────
+  test:
+    name: Tests
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Installer les dépendances
+        working-directory: ./backend
+        run: npm install
+
+      - name: Lancer les tests
+        working-directory: ./backend
+        run: npm test
+        # Pipeline bloqué ici si les tests échouent
+
+  # ──────────────────────────────────────
+  # ÉTAPE 3 & 4 : Build + Push Docker Hub
+  # ──────────────────────────────────────
+  build-and-push:
+    name: Build & Push Docker
+    runs-on: ubuntu-latest
+    needs: test  # ← attend que les tests passent
+
     steps:
       - uses: actions/checkout@v3
 
@@ -31,9 +61,14 @@ jobs:
           push: true
           tags: marinecdt/frontend:latest
 
+  # ──────────────────────────────────────
+  # ÉTAPE 5 & 6 : Déploiement sur la VM
+  # ──────────────────────────────────────
   deploy:
-    needs: build-and-push
+    name: Déploiement Azure VM
     runs-on: ubuntu-latest
+    needs: build-and-push  # ← attend que les images soient pushées
+
     steps:
       - name: Déploiement sur la VM Azure via SSH
         uses: appleboy/ssh-action@master
@@ -42,9 +77,18 @@ jobs:
           username: ${{ secrets.VM_USER }}
           password: ${{ secrets.VM_PASSWORD }}
           script: |
-            # On va dans le dossier du projet
             cd projet_final_integration_deploiement
-            # On tire les nouvelles images
+
+            # Récupérer le dernier code
+            git pull origin main
+
+            # Tirer les nouvelles images Docker Hub
             docker-compose pull
-            # On redémarre les services
-            docker-compose up -d --build
+
+            # Redémarrer les services avec les nouvelles images
+            docker-compose up -d
+
+            # Vérifier que les conteneurs tournent
+            docker-compose ps
+
+            echo "Déploiement terminé !"
