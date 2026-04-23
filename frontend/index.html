@@ -21,9 +21,7 @@
             const resDiv = document.getElementById('resultat');
             try {
                 // Utilise localhost en local, ou l'IP de ta VM sur Azure
-                const backendUrl = window.location.hostname === 'localhost'
-                    ? 'http://localhost:3000'
-                    : `http://${window.location.hostname}:30000`;
+                const backendUrl = `http://${window.location.hostname}:30000`;
                 const response = await fetch(`${backendUrl}/health`);
                 const data = await response.json();
                 resDiv.innerHTML = `Backend répond : ${data.status}`;
