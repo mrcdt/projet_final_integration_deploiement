@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Frontend K8s</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+        .box { padding: 20px; border: 1px solid #ccc; display: inline-block; border-radius: 8px; }
+        button { padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px;}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Service Frontend (Nginx)</h1>
+        <p>Veuillez renseigner l'URL de votre Backend ci-dessous (ex: http://localhost:3000 ou l'IP de votre VM).</p>
+        
+        <input type="text" id="backendUrl" value="http://localhost:3000" size="40">
+        <br><br>
+        <button onclick="testBackend()">Tester la connexion</button>
+        <p id="resultat"></p>
+    </div>
+
+    <script>
+        async function testBackend() {
+            const baseUrl = document.getElementById('backendUrl').value;
+            const resDiv = document.getElementById('resultat');
+            try {
+                const response = await fetch(`${baseUrl}/health`);
+                const data = await response.json();
+                resDiv.innerHTML = `✅ Backend OK ! Statut: ${data.status}`;
+                resDiv.style.color = "green";
+            } catch (error) {
+                resDiv.innerHTML = "❌ Erreur : Impossible de joindre le backend.";
+                resDiv.style.color = "red";
+            }
+        }
+    </script>
+</body>
+</html>
