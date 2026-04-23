@@ -2,36 +2,57 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Frontend K8s</title>
+    <title>Marine's Dashboard ✨</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        .box { padding: 20px; border: 1px solid #ccc; display: inline-block; border-radius: 8px; }
-        button { padding: 10px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px;}
+        body { 
+            font-family: 'Segoe UI', cursive, sans-serif; 
+            text-align: center; 
+            background: linear-gradient(135deg, #fce4ec, #f3e5f5);
+            color: #880e4f;
+            padding-top: 50px;
+        }
+        .card { 
+            background: white; 
+            padding: 30px; 
+            border-radius: 25px; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            display: inline-block; 
+            width: 80%; max-width: 400px;
+        }
+        h1 { color: #d81b60; font-size: 24px; }
+        button { 
+            padding: 12px 25px; margin: 10px; border: none; border-radius: 20px; 
+            cursor: pointer; background: #ec407a; color: white; font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { background: #d81b60; transform: scale(1.05); }
+        #resultat { margin-top: 20px; padding: 15px; border-radius: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="box">
-        <h1>Service Frontend (Nginx)</h1>
-        <p>Veuillez renseigner l'URL de votre Backend ci-dessous (ex: http://localhost:3000 ou l'IP de votre VM).</p>
-        
-        <input type="text" id="backendUrl" value="http://localhost:3000" size="40">
-        <br><br>
-        <button onclick="testBackend()">Tester la connexion</button>
-        <p id="resultat"></p>
+    <div class="card">
+        <h1>Bienvenue chez Marine Cadet ✨</h1>
+        <p>Tout fonctionne à merveille !</p>
+        <button onclick="testConnection()">Tester la connexion</button>
+        <div id="resultat"></div>
     </div>
 
     <script>
-        async function testBackend() {
-            const baseUrl = document.getElementById('backendUrl').value;
+        async function testConnection() {
             const resDiv = document.getElementById('resultat');
+            // MODIFICATION ICI : On cible explicitement le port 3000 du backend
+            const backendUrl = "http://localhost:3000"; 
             try {
-                const response = await fetch(`${baseUrl}/health`);
+                const response = await fetch(`${backendUrl}/health`);
                 const data = await response.json();
-                resDiv.innerHTML = `✅ Backend OK ! Statut: ${data.status}`;
-                resDiv.style.color = "green";
-            } catch (error) {
-                resDiv.innerHTML = "❌ Erreur : Impossible de joindre le backend.";
-                resDiv.style.color = "red";
+                resDiv.style.backgroundColor = "#c8e6c9";
+                resDiv.style.color = "#2e7d32";
+                resDiv.innerHTML = `✅ Connecté au Backend !<br>Status: ${data.status}`;
+            } catch (err) {
+                resDiv.style.backgroundColor = "#ffcdd2";
+                resDiv.style.color = "#c62828";
+                resDiv.innerHTML = "❌ Oups, connexion échouée !";
+                console.error(err); // Affiche l'erreur réelle dans la console du navigateur (F12)
             }
         }
     </script>
