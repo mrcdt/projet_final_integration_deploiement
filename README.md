@@ -105,6 +105,20 @@ kubectl apply -f k8s/frontend.yml
 
 ---
 
+### Accéder au site depuis la VM Azure
+ 
+| Service           | URL d'accès                        |
+|-------------------|------------------------------------|
+| 🖥️ Frontend       | `http://20.19.80.2:30001`             |
+| ⚙️ Backend health | `http://20.19.80.2:30000/health`      |
+| 🗄️ DB health      | `http://20.19.80.2:30000/db-health`   |
+ 
+ 
+> ⚠️ **Pré-requis Azure** : les ports `30000` et `30001` doivent être ouverts dans le **Groupe de sécurité réseau (NSG)** de ta VM Azure.
+> Dans le portail Azure → VM → Mise en réseau → Ajouter une règle de port entrant pour les ports `30000` et `30001` (protocole TCP).
+ 
+---
+
 ## 🔌 Endpoints API
 
 | Méthode | Route        | Description                        |
